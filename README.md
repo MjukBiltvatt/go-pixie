@@ -14,10 +14,12 @@ import "github.com/jomla97/go-pixie"
 ```
 
 ## Complete example
+* Numbers in `to` should be separated with a comma (`,`)
+* For a newline in `message`, use `\n`
 ``` go
 px := pixie.NewClient("username", "password")
 
-err := px.Send("sender", "+46xxxxxxxxx", "Hello world!\n\nRegards,\ngo-pixie")
+err := px.Send("sender", "to", "message")
 if err != nil {
     //Handle error
 }
