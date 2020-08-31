@@ -14,7 +14,7 @@ import "github.com/jomla97/go-pixie"
 ```
 
 ## Complete example
-* Numbers in `to` should be separated with a comma (`,`)
+* Numbers in `to` should be separated with a comma (`,`) and should each be lead with the country-code (e.g `+46` for Sweden)
 * For a newline in `message`, use `\n`
 ``` go
 px := pixie.NewClient("username", "password")
