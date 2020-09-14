@@ -20,7 +20,7 @@ import "github.com/jomla97/go-pixie"
 //Create a new Client
 px := pixie.NewClient("username", "password")
 
-//Set a standard country code (not required, but if the first character of the phone number is `0` an error is returned)
+//Set a standard country code (not required, but if the first character of the phone number is `0` an error is returned otherwise)
 px.StandardCountryCode = "+46"
 
 //Send the SMS
