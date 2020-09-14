@@ -29,6 +29,7 @@ multiple phonenumbers should be separated with commas (,).
 - `message` is the message to send, use `\n` for newline.
 */
 func (c Client) Send(sender string, to string, message string) error {
+	//Make sure the arguments are not empty strings
 	if sender == "" {
 		return errors.New("the specified `sender` is not valid")
 	} else if to == "" {
@@ -37,12 +38,14 @@ func (c Client) Send(sender string, to string, message string) error {
 		return errors.New("the specified `message` is not valid")
 	}
 
+	//Replace all invalid characters in the recipients string
 	reg, err := regexp.Compile("[^,+0-9]+")
 	if err != nil {
 		return fmt.Errorf("failed to compile regexp: %v", err.Error())
 	}
 	to = reg.ReplaceAllString(to, "")
 
+	//Use the standard country code if specified
 	if c.StandardCountryCode != "" {
 		var standardCountryCode = c.StandardCountryCode
 		if standardCountryCode[0:1] != "+" {
@@ -63,6 +66,7 @@ func (c Client) Send(sender string, to string, message string) error {
 		to = strings.ReplaceAll(to, ",0", ","+standardCountryCode)
 	}
 
+	//Send GET request to the Pixie SMS Server
 	resp, err := http.DefaultClient.Get(fmt.Sprintf("http://smsserver.pixie.se/sendsms.asp?account=%v&pwd=%v&receivers=%v&sender=%v&message=%v", url.QueryEscape(c.Username), url.QueryEscape(c.Password), url.QueryEscape(to), url.QueryEscape(sender), url.QueryEscape(message)))
 	if err != nil {
 		return fmt.Errorf("failed to GET: %v", err.Error())
@@ -83,5 +87,6 @@ func (c Client) Send(sender string, to string, message string) error {
 		return errors.New(response.Description)
 	}
 
+	//No errors occured
 	return nil
 }
