@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"regexp"
+	"strings"
 )
 
 //Client contains the API credentials
@@ -35,19 +37,30 @@ func (c Client) Send(sender string, to string, message string) error {
 		return errors.New("the specified `message` is not valid")
 	}
 
-	if c.StandardCountryCode != "" && to[0:1] == "0" {
-		//First character in phone number is a zero, replace it with the standard country code
-		var n []rune
-		p := []rune(to)
-		for i := 1; i < len(p); i++ {
-			n = append(n, p[i])
+	reg, err := regexp.Compile("[^,+0-9]+")
+	if err != nil {
+		return fmt.Errorf("failed to compile regexp: %v", err.Error())
+	}
+	to = reg.ReplaceAllString(to, "")
+
+	if c.StandardCountryCode != "" {
+		var standardCountryCode = c.StandardCountryCode
+		if standardCountryCode[0:1] != "+" {
+			standardCountryCode = "+" + standardCountryCode
 		}
 
-		if c.StandardCountryCode[0:1] == "+" {
-			to = c.StandardCountryCode + string(n)
-		} else {
-			to = "+" + c.StandardCountryCode + string(n)
+		if to[0:1] == "0" {
+			//First character in phone number is a zero, replace it with the standard country code
+			var n []rune
+			p := []rune(to)
+			for i := 1; i < len(p); i++ {
+				n = append(n, p[i])
+			}
+
+			to = standardCountryCode + string(n)
 		}
+
+		to = strings.ReplaceAll(to, ",0", ","+standardCountryCode)
 	}
 
 	resp, err := http.DefaultClient.Get(fmt.Sprintf("http://smsserver.pixie.se/sendsms.asp?account=%v&pwd=%v&receivers=%v&sender=%v&message=%v", url.QueryEscape(c.Username), url.QueryEscape(c.Password), url.QueryEscape(to), url.QueryEscape(sender), url.QueryEscape(message)))
