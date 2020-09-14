@@ -11,8 +11,9 @@ import (
 
 //Client contains the API credentials
 type Client struct {
-	Username string
-	Password string
+	Username            string
+	Password            string
+	StandardCountryCode string
 }
 
 /*
@@ -32,6 +33,21 @@ func (c Client) Send(sender string, to string, message string) error {
 		return errors.New("the specified `to` is not valid")
 	} else if message == "" {
 		return errors.New("the specified `message` is not valid")
+	}
+
+	if c.StandardCountryCode != "" && to[0:1] == "0" {
+		//First character in phone number is a zero, replace it with the standard country code
+		var n []rune
+		p := []rune(to)
+		for i := 1; i < len(p); i++ {
+			n = append(n, p[i])
+		}
+
+		if c.StandardCountryCode[0:1] == "+" {
+			to = c.StandardCountryCode + string(n)
+		} else {
+			to = "+" + c.StandardCountryCode + string(n)
+		}
 	}
 
 	resp, err := http.DefaultClient.Get(fmt.Sprintf("http://smsserver.pixie.se/sendsms.asp?account=%v&pwd=%v&receivers=%v&sender=%v&message=%v", url.QueryEscape(c.Username), url.QueryEscape(c.Password), url.QueryEscape(to), url.QueryEscape(sender), url.QueryEscape(message)))
