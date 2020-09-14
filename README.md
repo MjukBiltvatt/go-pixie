@@ -14,7 +14,7 @@ import "github.com/jomla97/go-pixie"
 ```
 
 ## Complete example
-* Numbers in `to` should be separated with a comma (`,`) and should each be lead with the country-code (e.g `+46` for Sweden)
+* Multiple phone numbers in `to` should be separated with a comma (`,`)
 * For a newline in `message`, use `\n`
 ``` go
 //Create a new Client
