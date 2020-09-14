@@ -26,6 +26,14 @@ multiple phonenumbers should be separated with commas (,).
 - `message` is the message to send, use `\n` for newline.
 */
 func (c Client) Send(sender string, to string, message string) error {
+	if sender == "" {
+		return errors.New("the specified `sender` is not valid")
+	} else if to == "" {
+		return errors.New("the specified `to` is not valid")
+	} else if message == "" {
+		return errors.New("the specified `message` is not valid")
+	}
+
 	resp, err := http.DefaultClient.Get(fmt.Sprintf("http://smsserver.pixie.se/sendsms.asp?account=%v&pwd=%v&receivers=%v&sender=%v&message=%v", url.QueryEscape(c.Username), url.QueryEscape(c.Password), url.QueryEscape(to), url.QueryEscape(sender), url.QueryEscape(message)))
 	if err != nil {
 		return fmt.Errorf("failed to GET: %v", err.Error())
