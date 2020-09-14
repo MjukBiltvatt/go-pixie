@@ -87,6 +87,6 @@ func (c Client) Send(sender string, to string, message string) error {
 		return errors.New(response.Description)
 	}
 
-	//No errors occured
+	//No errors occurred
 	return nil
 }
