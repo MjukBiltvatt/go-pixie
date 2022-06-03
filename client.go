@@ -18,6 +18,14 @@ type Client struct {
 	StandardCountryCode string
 }
 
+//New returns a client used for requests to the Pixie API
+func New(username string, password string) Client {
+	return Client{
+		Username: username,
+		Password: password,
+	}
+}
+
 /*
 Send an SMS via the Pixie API
 
@@ -28,7 +36,7 @@ multiple phonenumbers should be separated with commas (,).
 
 - `message` is the message to send, use `\n` for newline.
 */
-func (c Client) Send(sender string, to string, message string) error {
+func (c Client) Send(sender, to, message string) error {
 	//Make sure the arguments are not empty strings
 	if sender == "" {
 		return errors.New("the specified `sender` is not valid")
@@ -67,7 +75,16 @@ func (c Client) Send(sender string, to string, message string) error {
 	}
 
 	//Send GET request to the Pixie SMS Server
-	resp, err := http.DefaultClient.Get(fmt.Sprintf("http://smsserver.pixie.se/sendsms.asp?account=%v&pwd=%v&receivers=%v&sender=%v&message=%v", url.QueryEscape(c.Username), url.QueryEscape(c.Password), url.QueryEscape(to), url.QueryEscape(sender), url.QueryEscape(message)))
+	resp, err := http.DefaultClient.Get(
+		fmt.Sprintf(
+			"http://smsserver.pixie.se/sendsms.asp?account=%s&pwd=%s&receivers=%s&sender=%s&message=%s",
+			url.QueryEscape(c.Username),
+			url.QueryEscape(c.Password),
+			url.QueryEscape(to),
+			url.QueryEscape(sender),
+			url.QueryEscape(message),
+		),
+	)
 	if err != nil {
 		return fmt.Errorf("failed to GET: %v", err.Error())
 	}
@@ -79,7 +96,11 @@ func (c Client) Send(sender string, to string, message string) error {
 	}
 
 	//Unmarshal xml
-	var response Response
+	var response struct {
+		XMLName     xml.Name `xml:"response"`
+		Code        string   `xml:"code,attr"`
+		Description string   `xml:"description,attr"`
+	}
 	err = xml.Unmarshal(body, &response)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal xml: %v", err.Error())
